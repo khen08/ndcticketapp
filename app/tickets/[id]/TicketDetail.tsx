@@ -110,16 +110,25 @@ const TicketDetail = ({ ticket, users, replies: initialReplies }: Props) => {
         </CardFooter>
       </Card>
       <div className="pl-4 mb-3 mx-4 flex lg:flex-col lg:mx-0 gap-2">
+        {currentUser && (
+          <>
+            {(currentUser.name === ticket.createdBy ||
+              currentUser.role === "ADMIN") && (
+              <>
+                <Link
+                  href={`/tickets/edit/${ticket.id}`}
+                  className={`${buttonVariants({
+                    variant: "secondary",
+                  })}`}
+                >
+                  Edit Ticket
+                </Link>
+                <DeleteButton ticketId={ticket.id} />
+              </>
+            )}
+          </>
+        )}
         <AssignTicket ticket={ticket} users={users} />
-        <Link
-          href={`/tickets/edit/${ticket.id}`}
-          className={`${buttonVariants({
-            variant: "secondary",
-          })}`}
-        >
-          Edit Ticket
-        </Link>
-        <DeleteButton ticketId={ticket.id} />
       </div>
       <Card className="mx-4 mb-4 lg:col-span-4 lg:mr-4">
         <CardHeader>
