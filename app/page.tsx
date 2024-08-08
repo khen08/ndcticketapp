@@ -39,11 +39,11 @@ const Dashboard = async () => {
         <div className="flex flex-col h-full gap-5">
           <RecentTickets tickets={tickets} />
         </div>
-        <div className="flex flex-col gap-5 h-full">
-          <div>
+        <div className="flex flex-col h-full gap-5">
+          <div className="flex-grow">
             <DashboardChart data={data} />
           </div>
-          <div>
+          <div className="flex-grow">
             <TopCarousel />
           </div>
         </div>
