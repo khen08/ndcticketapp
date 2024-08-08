@@ -75,7 +75,7 @@ const DashboardChart = ({ data }: dataProps) => {
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
     >
-      <Card>
+      <Card className="flex-grow">
         <CardHeader>
           <CardTitle>Ticket Counts</CardTitle>
           <CardDescription>Overview of ticket counts by status</CardDescription>
