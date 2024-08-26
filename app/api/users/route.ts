@@ -1,9 +1,9 @@
 import prisma from "@/prisma/db";
-import { userSchema } from "@/ValidationSchemas/users";
-import { NextRequest, NextResponse } from "next/server";
-import bcrypt from "bcryptjs";
-import { getServerSession } from "next-auth";
 import options from "../auth/[...nextauth]/options";
+import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import bcrypt from "bcryptjs";
+import { userSchema } from "@/ValidationSchemas/users";
 
 export async function POST(request: NextRequest) {
   const session = await getServerSession(options);
@@ -28,19 +28,18 @@ export async function POST(request: NextRequest) {
 
   const duplicate = await prisma.user.findUnique({
     where: {
-      username: body.username,
+      name: body.name,
     },
   });
 
   if (duplicate) {
-    return NextResponse.json(
-      { message: "Duplicate Username" },
-      { status: 409 }
-    );
+    return NextResponse.json({ message: "Duplicate Name" }, { status: 409 });
   }
 
-  const hashPassword = await bcrypt.hash(body.password, 10);
-  body.password = hashPassword;
+  if (body.password) {
+    const hashedPassword = await bcrypt.hash(body.password, 10);
+    body.password = hashedPassword;
+  }
 
   const newUser = await prisma.user.create({
     data: { ...body },
@@ -51,35 +50,19 @@ export async function POST(request: NextRequest) {
 
 export async function GET() {
   try {
-    const technicians = await prisma.user.findMany({
-      where: {
-        role: "TECHNICIAN",
-      },
+    const users = await prisma.user.findMany({
       select: {
-        id: true,
         name: true,
-        _count: {
-          select: {
-            assignedTickets: true,
-          },
-        },
+        role: true,
       },
       orderBy: {
-        assignedTickets: {
-          _count: "desc",
-        },
+        name: "asc",
       },
     });
 
-    const topTechnicians = technicians.map((technician) => ({
-      id: technician.id,
-      name: technician.name,
-      ticketCount: technician._count.assignedTickets,
-    }));
-
-    return NextResponse.json(topTechnicians);
+    return NextResponse.json(users);
   } catch (error) {
-    console.error("Error fetching top technicians:", error);
+    console.error("Error fetching users:", error);
     return NextResponse.error();
   }
 }

@@ -28,7 +28,7 @@ const Users = async ({ searchParams }: { searchParams: SearchParams }) => {
   const orderBy = searchParams.orderBy ? searchParams.orderBy : "name";
   const order = searchParams.order ? searchParams.order : "asc";
 
-  const roles = ["ADMIN", "TECHNICIAN", "USER"];
+  const roles = ["ADMIN", "USER"];
   const role = roles.includes(searchParams.role)
     ? searchParams.role
     : undefined;
@@ -49,15 +49,17 @@ const Users = async ({ searchParams }: { searchParams: SearchParams }) => {
   });
 
   return (
-    <div className="p-4 md:p-6 lg:p-8 flex flex-col gap-4">
+    <div className="w-full max-h-[100vh] p-4 md:p-6 lg:p-8 flex flex-row gap-4 items-start">
       <UserForm />
-      <RoleFilter />
-      <UserTable users={users} searchParams={searchParams} />
-      <Pagination
-        itemCount={userCount}
-        pageSize={pageSize}
-        currentPage={page}
-      />
+      <div className="w-full flex flex-col gap-4">
+        <RoleFilter />
+        <UserTable users={users} searchParams={searchParams} />
+        <Pagination
+          itemCount={userCount}
+          pageSize={pageSize}
+          currentPage={page}
+        />
+      </div>
     </div>
   );
 };

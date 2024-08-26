@@ -1,12 +1,11 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, FormControl, FormField, FormItem, FormLabel } from "./ui/form";
 import { z } from "zod";
 import { userSchema } from "@/ValidationSchemas/users";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "./ui/input";
-
 import {
   Select,
   SelectContent,
@@ -29,22 +28,49 @@ interface Props {
 const UserForm = ({ user }: Props) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
+  const [showPasswordInput, setShowPasswordInput] = useState(
+    user?.role === "ADMIN"
+  );
   const router = useRouter();
 
   const form = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
     defaultValues: {
       name: user?.name || "",
-      username: user?.username || "",
       password: "",
       role: user?.role || "USER",
     },
   });
 
+  useEffect(() => {
+    if (showPasswordInput) {
+      form.setValue("password", "");
+    } else {
+      form.setValue("password", "nopassword");
+    }
+  }, [showPasswordInput, form]);
+
+  const handleRoleChange = (value: "ADMIN" | "USER") => {
+    form.setValue("role", value);
+    setShowPasswordInput(value === "ADMIN");
+
+    if (value === "USER") {
+      form.setValue("password", "nopassword");
+    }
+  };
+
   async function onSubmit(values: z.infer<typeof userSchema>) {
     try {
       setIsSubmitting(true);
       setError("");
+
+      if (values.role === "USER") {
+        values.password = "nopassword";
+      } else if (values.role === "ADMIN" && !values.password) {
+        setError("Password is required for Admin role.");
+        setIsSubmitting(false);
+        return;
+      }
 
       if (user) {
         await axios.patch("/api/users/" + user.id, values);
@@ -76,44 +102,34 @@ const UserForm = ({ user }: Props) => {
             defaultValue={user?.name}
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Full Name</FormLabel>
+                <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Enter Full Name..." {...field} />
+                  <Input placeholder="Enter Name..." {...field} />
                 </FormControl>
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="username"
-            defaultValue={user?.username}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Username</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter a Username..." {...field} />
-                </FormControl>
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="password"
-            defaultValue=""
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Password</FormLabel>
-                <FormControl>
-                  <Input
-                    type="password"
-                    required={user ? false : true}
-                    placeholder="Enter Password"
-                    {...field}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
+
+          {showPasswordInput && (
+            <FormField
+              control={form.control}
+              name="password"
+              defaultValue=""
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="password"
+                      placeholder="Enter Password"
+                      {...field}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+          )}
+
           <div className="flex w-full space-x-4">
             <FormField
               control={form.control}
@@ -123,7 +139,10 @@ const UserForm = ({ user }: Props) => {
                 <FormItem>
                   <FormLabel>Role</FormLabel>
                   <Select
-                    onValueChange={field.onChange}
+                    onValueChange={(value) => {
+                      handleRoleChange(value as "ADMIN" | "USER");
+                      field.onChange(value as "ADMIN" | "USER");
+                    }}
                     defaultValue={field.value}
                   >
                     <FormControl>
@@ -136,7 +155,6 @@ const UserForm = ({ user }: Props) => {
                     </FormControl>
                     <SelectContent>
                       <SelectItem value="USER">User</SelectItem>
-                      <SelectItem value="TECHNICIAN">Technician</SelectItem>
                       <SelectItem value="ADMIN">Admin</SelectItem>
                     </SelectContent>
                   </Select>
@@ -144,6 +162,7 @@ const UserForm = ({ user }: Props) => {
               )}
             />
           </div>
+
           <div className="flex gap-2">
             <Button
               className={buttonVariants({

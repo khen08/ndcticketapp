@@ -91,7 +91,7 @@ const TicketDetail = ({ ticket, users, replies: initialReplies }: Props) => {
               hour: "numeric",
               minute: "2-digit",
               hour12: true,
-            })}{" "}
+            })}
           </CardDescription>
         </CardHeader>
         <CardContent className="mb-4">
@@ -128,7 +128,11 @@ const TicketDetail = ({ ticket, users, replies: initialReplies }: Props) => {
             )}
           </>
         )}
-        <AssignTicket ticket={ticket} users={users} />
+        <AssignTicket
+          ticket={ticket}
+          users={users}
+          currentUserRole={currentUser?.role}
+        />
       </div>
       <Card className="mx-4 mb-4 lg:col-span-4 lg:mr-4">
         <CardHeader>
@@ -146,7 +150,7 @@ const TicketDetail = ({ ticket, users, replies: initialReplies }: Props) => {
                   <p className="text-gray-400 flex items-center justify-between">
                     by:{" "}
                     <Avatar className="mx-2">
-                      <AvatarFallback className=" bg-rose-600">
+                      <AvatarFallback className="text-white bg-green-600 border-2 border-slate-700">
                         {reply.user.name.charAt(0)}
                       </AvatarFallback>
                     </Avatar>

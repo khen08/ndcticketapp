@@ -24,6 +24,7 @@ const ToggleMode = () => {
       variant="outline"
       size="icon"
       onClick={() => setTheme(`${light ? "dark" : "light"}`)}
+      className="ml-4"
     >
       {light ? (
         <Moon className="hover:cursor-pointer hover:text-primary" />

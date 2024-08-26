@@ -40,22 +40,16 @@ enum Priority {
 }
 
 model User {
-  id              Int       @id @default(autoincrement())
-  name            String
-  username        String    @unique
+  id              Int      @id @default(autoincrement())
+  name            String   @unique
   password        String
-  failedAttempts  Int       @default(0)
-  lockoutUntil    DateTime?
-  role            Role      @default(USER)
-  assignedTickets Ticket[]  @relation("AssignedTickets")
+  role            Role     @default(USER)
+  assignedTickets Ticket[] @relation("AssignedTickets")
   replies         Reply[]
-
-  @@index([username])
 }
 
 enum Role {
   ADMIN
-  TECHNICIAN
   USER
 }
 

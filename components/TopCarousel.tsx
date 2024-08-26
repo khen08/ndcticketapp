@@ -23,7 +23,7 @@ const TopCarousel = () => {
 
   useEffect(() => {
     const fetchTopTechnicians = async () => {
-      const response = await fetch("/api/users");
+      const response = await fetch("/api/technicians");
       const data: Technician[] = await response.json();
       setTopTechnicians(data);
     };
@@ -63,7 +63,7 @@ const TopCarousel = () => {
                     >
                       <div className="flex items-center justify-center">
                         <Avatar className="w-16 h-16">
-                          <AvatarFallback className="bg-rose-600 text-white">
+                          <AvatarFallback className="bg-green-600 text-white">
                             {technician.name.charAt(0)}
                           </AvatarFallback>
                         </Avatar>

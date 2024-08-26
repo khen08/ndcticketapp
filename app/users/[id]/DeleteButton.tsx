@@ -1,5 +1,6 @@
-"use client";
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import axios from "axios";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,8 +13,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { buttonVariants } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import axios from "axios";
+import { signOut } from "next-auth/react";
 
 const DeleteButton = ({ userId }: { userId: number }) => {
   const router = useRouter();
@@ -23,9 +23,20 @@ const DeleteButton = ({ userId }: { userId: number }) => {
   const deleteUser = async () => {
     try {
       setIsDeleting(true);
-      await axios.delete("/api/users/" + userId);
-      router.push("/users");
-      router.refresh();
+      const response = await axios.delete(`/api/users/${userId}`);
+
+      if (response.data.redirectTo) {
+        router.push(response.data.redirectTo);
+
+        if (response.data.redirectTo === "/auth/signin") {
+          await signOut({ redirect: false });
+          router.push(response.data.redirectTo);
+          router.refresh();
+        }
+      } else {
+        router.push("/users");
+        router.refresh();
+      }
     } catch (error) {
       setIsDeleting(false);
       setError("Unknown Error Occured.");
@@ -36,9 +47,7 @@ const DeleteButton = ({ userId }: { userId: number }) => {
     <>
       <AlertDialog>
         <AlertDialogTrigger
-          className={buttonVariants({
-            variant: "destructive",
-          })}
+          className={buttonVariants({ variant: "destructive" })}
           disabled={isDeleting}
         >
           Delete User
@@ -54,9 +63,7 @@ const DeleteButton = ({ userId }: { userId: number }) => {
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              className={buttonVariants({
-                variant: "destructive",
-              })}
+              className={buttonVariants({ variant: "destructive" })}
               disabled={isDeleting}
               onClick={deleteUser}
             >

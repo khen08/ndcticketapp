@@ -1,6 +1,6 @@
 import React from "react";
 import prisma from "@/prisma/db";
-import TicketDetail from "./TicketDetail"; // Adjust the path as necessary
+import TicketDetail from "./TicketDetail";
 
 interface Props {
   params: { id: string };
@@ -14,7 +14,7 @@ const ViewTicket = async ({ params }: Props) => {
   const users = await prisma.user.findMany({
     where: {
       role: {
-        in: ["ADMIN", "TECHNICIAN"],
+        in: ["ADMIN"],
       },
     },
   });

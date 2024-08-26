@@ -1,5 +1,5 @@
 import { Priority } from "@prisma/client";
-import { Flame } from "lucide-react";
+import { IconExclamationCircle } from "@tabler/icons-react";
 import React from "react";
 
 interface Props {
@@ -15,19 +15,19 @@ const priorityMap: Record<Priority, { label: string; level: 1 | 2 | 3 }> = {
 const TicketPriority = ({ priority }: Props) => {
   return (
     <div className="flex justify-between">
-      <Flame
+      <IconExclamationCircle
         className={`${
-          priorityMap[priority].level >= 1 ? "text-red-500" : "text-muted"
+          priorityMap[priority].level >= 1 ? "text-green-500" : "text-muted"
         }`}
       />
-      <Flame
+      <IconExclamationCircle
         className={`${
-          priorityMap[priority].level >= 2 ? "text-red-500" : "text-muted"
+          priorityMap[priority].level >= 2 ? "text-green-500" : "text-muted"
         }`}
       />{" "}
-      <Flame
+      <IconExclamationCircle
         className={`${
-          priorityMap[priority].level >= 3 ? "text-red-500" : "text-muted"
+          priorityMap[priority].level >= 3 ? "text-green-500" : "text-muted"
         }`}
       />
     </div>

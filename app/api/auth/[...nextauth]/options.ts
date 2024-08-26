@@ -3,79 +3,38 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 
-const MAX_ATTEMPTS = 5;
-const LOCKOUT_DURATION = 15 * 60 * 1000; // 15 minutes lockout duration
-
 const options: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       id: "credentials",
-      name: "Credentials",
+      name: "Select User",
       credentials: {
-        username: {
-          label: "Username",
-          type: "text",
-          placeholder: "Username...",
-        },
-        password: {
-          label: "Password",
-          type: "password",
-        },
+        name: { label: "Name", type: "text" },
+        password: { label: "Password", type: "password" },
       },
-      authorize: async (credentials, req) => {
+      authorize: async (credentials) => {
         const user = await prisma.user.findUnique({
-          where: { username: credentials?.username },
+          where: { name: credentials?.name },
         });
+
         if (!user) {
-          throw new Error("Invalid username or password.");
+          throw new Error("User not found.");
         }
 
-        if (user.lockoutUntil && user.lockoutUntil > new Date()) {
-          throw new Error("Account is locked. Try again later.");
-        }
-
-        const match = await bcrypt.compare(
-          credentials!.password,
+        const isPasswordValid = await bcrypt.compare(
+          credentials?.password || "",
           user.password
         );
 
-        if (match) {
-          await prisma.user.update({
-            where: { username: credentials!.username },
-            data: {
-              failedAttempts: 0,
-              lockoutUntil: null,
-            },
-          });
-
-          return {
-            id: user.id,
-            name: user.name,
-            username: user.username,
-            role: user.role,
-          };
-        } else {
-          const failedAttempts = user.failedAttempts + 1;
-
-          if (failedAttempts >= MAX_ATTEMPTS) {
-            await prisma.user.update({
-              where: { username: credentials!.username },
-              data: {
-                failedAttempts,
-                lockoutUntil: new Date(Date.now() + LOCKOUT_DURATION),
-              },
-            });
-            throw new Error(
-              "Account is locked due to too many failed attempts. Try again later."
-            );
-          } else {
-            await prisma.user.update({
-              where: { username: credentials!.username },
-              data: { failedAttempts },
-            });
-            throw new Error("Invalid password");
-          }
+        if (!isPasswordValid) {
+          throw new Error("Invalid password.");
         }
+
+        return {
+          id: user.id,
+          name: user.name,
+          role: user.role,
+        };
       },
     }),
   ],
@@ -84,16 +43,16 @@ const options: NextAuthOptions = {
     signOut: "/auth/signout",
   },
   callbacks: {
-    async jwt({ token, account, user }) {
-      if (account) {
-        token.role = user?.role;
-        token.id = user?.id;
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role;
+        token.id = user.id;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.role = token.role || "USER";
+        session.user.role = token.role;
         session.user.id = token.id;
       }
       return session;

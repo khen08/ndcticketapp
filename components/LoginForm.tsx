@@ -1,24 +1,53 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
+  CardDescription,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { signIn } from "next-auth/react";
+import axios from "axios";
+import { useRouter } from "next/navigation";
+
+type User = {
+  name: string;
+  role: string;
+};
 
 export function LoginForm() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [selectedUser, setSelectedUser] = useState<string>("");
+  const [users, setUsers] = useState<User[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [password, setPassword] = useState<string>("");
+  const router = useRouter();
 
-  const handleSubmit = async (event: React.FormEvent) => {
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get("/api/users");
+        setUsers(response.data as User[]);
+      } catch (error) {
+        console.error("Error fetching users", error);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  const handleSignIn = async (event: React.FormEvent) => {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
@@ -26,8 +55,8 @@ export function LoginForm() {
     try {
       const result = await signIn("credentials", {
         redirect: false,
-        username,
-        password,
+        name: selectedUser,
+        password: isAdmin ? password : "nopassword",
       });
 
       if (result?.error) {
@@ -50,13 +79,20 @@ export function LoginForm() {
             break;
         }
       } else {
-        window.location.href = "/";
+        router.push("/");
+        router.refresh();
       }
     } catch (error) {
       setError("An unexpected error occurred.");
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleUserSelect = (userName: string) => {
+    setSelectedUser(userName);
+    const selectedUser = users.find((user: User) => user.name === userName);
+    setIsAdmin(selectedUser?.role === "ADMIN");
   };
 
   return (
@@ -68,31 +104,40 @@ export function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent className="grid gap-4">
-        <form onSubmit={handleSubmit} className="grid gap-4">
+        <form onSubmit={handleSignIn} className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="username">Username</Label>
-            <Input
-              id="username"
-              type="text"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
+            <Select onValueChange={handleUserSelect}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a user" />
+              </SelectTrigger>
+              <SelectContent>
+                {users.map((user: User) => (
+                  <SelectItem key={user.name} value={user.name}>
+                    {user.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
+          {isAdmin && (
+            <div className="grid gap-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required={isAdmin}
+              />
+            </div>
+          )}
           {error && <p className="text-red-500">{error}</p>}
-          <Button type="submit" className="w-full" disabled={isLoading}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isLoading || !selectedUser || (isAdmin && !password)}
+          >
             {isLoading ? "Signing in..." : "Sign in"}
           </Button>
         </form>

@@ -13,7 +13,6 @@ import {
 const roles = [
   { label: "All", value: "ALL" },
   { label: "Admin", value: "ADMIN" },
-  { label: "Technician", value: "TECHNICIAN" },
   { label: "User", value: "USER" },
 ];
 

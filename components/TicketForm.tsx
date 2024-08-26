@@ -35,6 +35,9 @@ const TicketForm = ({ ticket }: Props) => {
 
   const form = useForm<TicketFormData>({
     resolver: zodResolver(ticketSchema),
+    defaultValues: {
+      status: ticket ? ticket.status : "OPEN",
+    },
   });
 
   useEffect(() => {
@@ -62,7 +65,7 @@ const TicketForm = ({ ticket }: Props) => {
 
         router.push(`/tickets/${ticket.id}`);
       } else {
-        const response = await axios.post("/api/tickets", data);
+        await axios.post("/api/tickets", data);
 
         router.push(`/tickets`);
       }
@@ -77,7 +80,7 @@ const TicketForm = ({ ticket }: Props) => {
   }
 
   return (
-    <div className="rounded-md border w-full p-4">
+    <div className="rounded-md border w-full p-4 mt-4">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
@@ -108,19 +111,19 @@ const TicketForm = ({ ticket }: Props) => {
             <FormField
               control={form.control}
               name="status"
-              defaultValue={ticket?.status}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Status</FormLabel>
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
+                    disabled={!ticket}
                   >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue
                           placeholder="Status..."
-                          defaultValue={ticket?.status}
+                          defaultValue={field.value}
                         />
                       </SelectTrigger>
                     </FormControl>

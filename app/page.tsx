@@ -34,7 +34,7 @@ const Dashboard = async () => {
   });
 
   return (
-    <div className="px-2">
+    <div className="max-w-6xl w-full px-2">
       <div className="mt-8 grid gap-5 lg:grid-cols-2 md:grid-cols-1">
         <div className="flex flex-col h-full gap-5">
           <RecentTickets tickets={tickets} />

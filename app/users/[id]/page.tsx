@@ -23,7 +23,7 @@ const EditUser = async ({ params }: Props) => {
     return <p className="pt-4 text-destructive">User Not Found.</p>;
   }
 
-  user.password = "";
   return <UserForm user={user} />;
 };
+
 export default EditUser;

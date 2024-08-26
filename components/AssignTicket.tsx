@@ -11,7 +11,15 @@ import {
   SelectValue,
 } from "./ui/select";
 
-const AssignTicket = ({ ticket, users }: { ticket: Ticket; users: User[] }) => {
+const AssignTicket = ({
+  ticket,
+  users,
+  currentUserRole,
+}: {
+  ticket: Ticket;
+  users: User[];
+  currentUserRole: string | undefined;
+}) => {
   const [isAssigning, setIsAssigning] = useState(false);
   const [error, setError] = useState("");
 
@@ -33,7 +41,7 @@ const AssignTicket = ({ ticket, users }: { ticket: Ticket; users: User[] }) => {
       <Select
         defaultValue={ticket.assignedToUserId?.toString() || "0"}
         onValueChange={assignTicket}
-        disabled={isAssigning}
+        disabled={isAssigning || currentUserRole !== "ADMIN"}
       >
         <SelectTrigger>
           <SelectValue

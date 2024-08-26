@@ -61,20 +61,6 @@ const UserTable = ({ users, searchParams }: Props) => {
                   href={{
                     query: {
                       ...searchParams,
-                      orderBy: "username",
-                      order: getNextOrder("username"),
-                    },
-                  }}
-                >
-                  Username
-                </Link>
-                {renderSortIcon("username")}
-              </TableHead>
-              <TableHead>
-                <Link
-                  href={{
-                    query: {
-                      ...searchParams,
                       orderBy: "role",
                       order: getNextOrder("role"),
                     },
@@ -92,9 +78,6 @@ const UserTable = ({ users, searchParams }: Props) => {
                   <TableRow key={user.id}>
                     <TableCell>
                       <Link href={`/users/${user.id}`}>{user.name}</Link>
-                    </TableCell>
-                    <TableCell>
-                      <Link href={`/users/${user.id}`}>{user.username}</Link>
                     </TableCell>
                     <TableCell>
                       <Link href={`/users/${user.id}`}>{user.role}</Link>
