@@ -31,7 +31,11 @@ const SignOut = () => {
           <Button className="w-full mr-2" onClick={() => router.push("/")}>
             Cancel
           </Button>
-          <Button className="w-full" onClick={handleSignOut}>
+          <Button
+            variant="destructive"
+            className="w-full"
+            onClick={handleSignOut}
+          >
             Sign Out
           </Button>
         </CardFooter>
